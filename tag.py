@@ -3,7 +3,7 @@ import time
 import math
 from statistics import mean
 
-DWM = serial.Serial(port="COM3", baudrate=115200)
+DWM = serial.Serial(port="/dev/ttyS0", baudrate=115200)
 precision = 5
 
 DWM.write("\r\r".encode())
