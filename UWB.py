@@ -1,4 +1,4 @@
-import serial, time, math
+import serial, time, math, random
 from statistics import mean
 
 class UWB:
@@ -30,23 +30,25 @@ class UWB:
         line = self.DWM.readline()
         # Make sure the line is long enough to be cosidered
         if(len(line) >= 20):
-                # Parse data to store new values of x and y in buffer ONLY IF these values are valid
-                parse = line.decode().split(',')
-                if parse[-5].strip() != "nan":
-                    self.xbuf[self.bufIdx] = float(parse[-5].strip())
-                    self.ybuf[self.bufIdx] = float(parse[-4].strip())
-                    self.bufIdx = (self.bufIdx+1) % self.precision
+            # Parse data to store new values of x and y in buffer ONLY IF these values are valid
+            parse = line.decode().split(',')
+            if parse[-5].strip() != "nan":
+                self.xbuf[self.bufIdx] = float(parse[-5].strip())
+                self.ybuf[self.bufIdx] = float(parse[-4].strip())
+                self.bufIdx = (self.bufIdx+1) % self.precision
 
-                    # Update xy position of tag
-                    self.x, self.y = (mean(self.xbuf),mean(self.ybuf))
+                # Update xy position of tag
+                self.x, self.y = (mean(self.xbuf),mean(self.ybuf))
 
-                    # Update angle from new values of x and y
-                    try:	
-                        self.theta = int(math.atan(self.x/self.y)*-180/math.pi)
-                    except ZeroDivisionError:
-                        self.theta = 90
-                    print(f"x={self.x:.3f} y={self.y:.3f} angle={self.theta}")
+                # Update angle from new values of x and y
+                try:	
+                    self.theta = int(math.atan(self.x/self.y)*-180/math.pi) + 90
+                except ZeroDivisionError:
+                    pass # Ignore very specific case where y=0 exactly
+                    
+                print(f"x={self.x:.3f} y={self.y:.3f} angle={self.theta}")
     
     def close(self):
         self.toggleDataFlow()
         self.DWM.close()
+        pass

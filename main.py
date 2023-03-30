@@ -1,17 +1,37 @@
-import UWB, servo, sys, time, threading
+import UWB, servo, time, threading
+from evdev import InputDevice, categorize, ecodes, list_devices
 
 def servoThread():
-    while not stopThread:
-        s.move(uwb.theta)
-        time.sleep(0.1)
+    while True:
+        serv.move(uwb.theta)
+        time.sleep(1)
+        print(f"temp {uwb.theta}")
+        
+def cameraThread():
+    device = None
+    EV_VAL_PRESSED = 1
+    EV_VAL_RELEASED = 0
+    BTN_SHUTTER = 115
+    
+    while True:
+        while device == None:
+            devices = [InputDevice(path) for path in list_devices()]
+            for d in devices:
+                if d.name == "AB Shutter3 Consumer Control":
+                    device = d
+        
+        for event in device.read_loop():
+            if event.type == ecodes.EV_KEY and event.value == EV_VAL_PRESSED and event.code == BTN_SHUTTER:
+                    print("Camera event")
+    
+        
 
 def setup():
-    global s, uwb, stopThread
-    stopThread = False
+    global serv, uwb
     uwb = UWB.UWB("/dev/ttyS0", 5)
-    s = servo.Servo(12)
-    sThread = threading.Thread(target=servoThread)
-    sThread.start()
+    serv = servo.Servo(12)
+    t = threading.Thread(target=servoThread, daemon=True).start()
+    t2 = threading.Thread(target=cameraThread, daemon=True).start()
     #init_camera?
 
 def cleanup():
@@ -27,10 +47,11 @@ if __name__ == "__main__":
         try:
             uwb.update_pos()
         except Exception as ex:
-            print(ex)
+            pass
+            #print(ex)
+            #break
         except KeyboardInterrupt:
-            stopThread = True
             break
 
     cleanup()
-    sys.exit(0)
+    

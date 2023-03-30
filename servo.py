@@ -9,7 +9,7 @@ class Servo:
 		
 	def move(self, angle):
 		dc = (angle / 180) * 2000 + 500  # Updating duty cycle written to servo to range of 500 - 2500 (pigpio)
-		self.pwm.set_servo_pulsewidth(12, dc)
+		self.pwm.set_servo_pulsewidth(self.pin, dc)
 			
 	def stop_pwm(self):
 		self.pwm.set_PWM_dutycycle(self.pin, 0)
