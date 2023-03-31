@@ -51,4 +51,3 @@ class UWB:
     def close(self):
         self.toggleDataFlow()
         self.DWM.close()
-        pass

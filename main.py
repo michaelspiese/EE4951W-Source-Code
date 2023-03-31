@@ -1,42 +1,32 @@
-import UWB, servo, time, threading
-from evdev import InputDevice, categorize, ecodes, list_devices
+import UWB, servo, cam, shutter, time, threading
 
 def servoThread():
     while True:
         serv.move(uwb.theta)
-        time.sleep(1)
-        print(f"temp {uwb.theta}")
+        time.sleep(0.05)
         
 def cameraThread():
-    device = None
-    EV_VAL_PRESSED = 1
-    EV_VAL_RELEASED = 0
-    BTN_SHUTTER = 115
-    
     while True:
-        while device == None:
-            devices = [InputDevice(path) for path in list_devices()]
-            for d in devices:
-                if d.name == "AB Shutter3 Consumer Control":
-                    device = d
-        
-        for event in device.read_loop():
-            if event.type == ecodes.EV_KEY and event.value == EV_VAL_PRESSED and event.code == BTN_SHUTTER:
-                    print("Camera event")
-    
-        
+        if btn.queue > 0:
+            camera.takePhoto()
+            print(f"Removing camera event from queue ({btn.queue-1} total)")
+            btn.queue -= 1
 
 def setup():
-    global serv, uwb
-    uwb = UWB.UWB("/dev/ttyS0", 5)
+    global serv, uwb, camera, btn
+    uwb = UWB.UWB("/dev/ttyACM0", 5)
     serv = servo.Servo(12)
-    t = threading.Thread(target=servoThread, daemon=True).start()
-    t2 = threading.Thread(target=cameraThread, daemon=True).start()
-    #init_camera?
+    btn = shutter.Shutter()
+    #camera = cam.ArducamHawkEye(res=(2312, 1736))
+    camera = cam.ArducamHawkEye(res=(4624, 3472))
+    
+    servThread = threading.Thread(target=servoThread, daemon=True).start()
+    shutterThread = threading.Thread(target=btn.btn_loop, daemon=True).start()
+    camThread = threading.Thread(target=cameraThread, daemon=True).start()
 
 def cleanup():
     uwb.close()
-    s.stop_pwm()
+    serv.stop_pwm()
 
 if __name__ == "__main__":
     setup()
@@ -47,9 +37,8 @@ if __name__ == "__main__":
         try:
             uwb.update_pos()
         except Exception as ex:
-            pass
-            #print(ex)
-            #break
+            print(ex)
+            break
         except KeyboardInterrupt:
             break
 
