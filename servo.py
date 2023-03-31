@@ -15,3 +15,15 @@ class Servo:
 	def stop_pwm(self):
 		self.pwm.set_PWM_dutycycle(self.pin, 0)
 		self.pwm.set_PWM_frequency(self.pin, 0)
+		
+if __name__ == "__main__":
+	s = Servo(12)
+	
+	while True:
+		try:
+			angle = int(input("Enter angle (0-180): "))
+			s.move(angle) 
+		except KeyboardInterrupt:
+			break
+	
+	s.stop_pwm()

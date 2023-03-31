@@ -1,4 +1,5 @@
 from evdev import InputDevice, categorize, ecodes, list_devices
+import time
 
 EV_VAL_PRESSED = 1
 EV_VAL_RELEASED = 0
@@ -21,6 +22,12 @@ class Shutter:
 		self.connect()
 		while True:
 			for event in self.shutter.read_loop():
+				time.sleep(0.5)
 				if event.type == ecodes.EV_KEY and event.value == EV_VAL_PRESSED and event.code == BTN_SHUTTER:
 					print(f"Adding camera event to queue ({self.queue+1} total)")
 					self.queue += 1
+					
+if __name__ == "__main__":
+	s = Shutter()
+	s.connect()
+	s.btn_loop()

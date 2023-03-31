@@ -51,3 +51,15 @@ class UWB:
     def close(self):
         self.toggleDataFlow()
         self.DWM.close()
+        
+if __name__ == "__main__":
+    u = UWB("/dev/ttyACM0", 5)
+    u.toggleDataFlow()
+    while True:
+        try:
+            u.update_pos()
+            time.sleep(5)
+            print(f"x: {u.x}, y: {u.y}, angle: {u.theta}")
+        except KeyboardInterrupt:
+            break
+    u.close()

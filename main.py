@@ -3,10 +3,11 @@ import UWB, servo, cam, shutter, time, threading
 def servoThread():
     while True:
         serv.move(uwb.theta)
-        time.sleep(0.05)
+        time.sleep(0.1)
         
 def cameraThread():
     while True:
+        time.sleep(1)
         if btn.queue > 0:
             camera.takePhoto()
             print(f"Removing camera event from queue ({btn.queue-1} total)")
@@ -14,11 +15,11 @@ def cameraThread():
 
 def setup():
     global serv, uwb, camera, btn
-    uwb = UWB.UWB("/dev/ttyACM0", 5)
+    uwb = UWB.UWB("/dev/ttyACM0", 1)
     serv = servo.Servo(12)
     btn = shutter.Shutter()
-    #camera = cam.ArducamHawkEye(res=(2312, 1736))
-    camera = cam.ArducamHawkEye(res=(4624, 3472))
+    camera = cam.ArducamHawkEye(res=(2312, 1736))
+    #camera = cam.ArducamHawkEye(res=(4624, 3472))
     
     servThread = threading.Thread(target=servoThread, daemon=True).start()
     shutterThread = threading.Thread(target=btn.btn_loop, daemon=True).start()
