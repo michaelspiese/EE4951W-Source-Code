@@ -33,41 +33,41 @@ class UWB:
         if(len(line) >= 20):
             # Parse data to store new values of x and y in buffer ONLY IF these values are valid
             parse = line.decode().split(',')
-            try:
-                if parse[-5].strip() != "nan":
-                    self.xbuf[self.bufIdx] = float(parse[-5].strip())
-                    self.ybuf[self.bufIdx] = float(parse[-4].strip())
+            if len(parse) > 4:
+                if parse[3].strip() != "nan":
+                    self.xbuf[self.bufIdx] = float(parse[3].strip())
+                    self.ybuf[self.bufIdx] = float(parse[4].strip())
                     self.bufIdx = (self.bufIdx+1) % self.precision
-            except:
-                print("Ignoring out of range error from parsing line")
-                return
 
-                # Update xy position of tag
-                self.x, self.y = (mean(self.xbuf),mean(self.ybuf))
-                
-                # Calculating the distance of the direct path to the tag from the camera
-                self.dist = math.sqrt(self.x**2 + self.y**2)
-
-                # Update angle from new values of x and y
-                try:	
-                    self.theta = int(math.atan(self.x/self.y)*-180/math.pi) + 90
-                except ZeroDivisionError:
-                    pass # Ignore very specific case where y=0 exactly
+                    # Update xy position of tag
+                    self.x, self.y = (mean(self.xbuf),mean(self.ybuf))
                     
-                print(f"x={self.x:.3f} y={self.y:.3f} distance={self.dist} angle={self.theta}")
-    
+                    # Calculating the distance of the direct path to the tag from the camera
+                    self.dist = math.sqrt(self.x**2 + self.y**2)
+
+                    # Update angle from new values of x and y
+                    try:	
+                        self.theta = int(math.atan(self.x/self.y)*-180/math.pi) + 90
+                    except ZeroDivisionError:
+                        pass # Ignore very specific case where y=0 exactly
+                    
+            else:
+                print(line.decode().strip(), end='')
+                print()
+                
+            print(f"x={self.x:.3f} y={self.y:.3f} distance={self.dist:.3f} angle={self.theta:.3f}")
+        
     def close(self):
         self.toggleDataFlow()
         self.DWM.close()
         
 if __name__ == "__main__":
-    u = UWB("/dev/ttyACM0", 5)
+    u = UWB("/dev/ttyACM0", 1)
     u.toggleDataFlow()
     while True:
         try:
             u.update_pos()
-            time.sleep(5)
-            print(f"x: {u.x}, y: {u.y}, angle: {u.theta}")
+            #print(f"x: {u.x}, y: {u.y}, angle: {u.theta}")
         except KeyboardInterrupt:
             break
     u.close()

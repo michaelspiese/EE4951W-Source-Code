@@ -10,7 +10,7 @@ class ArducamHawkEye:
 		self.cam = Picamera2()
 		self.config = self.cam.create_preview_configuration(main={"size": res},transform=Transform(hflip=True, vflip=True))
 		self.cam.configure(self.config)
-		# self.cam.start_preview(Preview.QT)
+		#self.cam.start_preview(Preview.QT)
 		self.cam.start()
 		self.set_focus(6.5)
 
