@@ -61,7 +61,7 @@ It is also necessary to add the following lines to `/boot/config.txt` under [All
 
 ```
 dtoverlay=arducam-64mp
-dtoverlay=vc4-kms-v3d,cma-256
+dtoverlay=vc4-kms-v3d,cma-512
 ```
 
 ## Boot script
