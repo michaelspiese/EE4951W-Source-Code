@@ -1,5 +1,35 @@
 # SoccerTracker: Method for Tracking and Photographing a Soccer Player
 
+# Project Description
+
+## Motive
+
+If one wished to photograph a soccer player and take "action shots" while they were playing the game, most of their focus would be on making sure the photos turned out and not on the game itself. This project aims to solve this problem by automating the camera's position, focus, and magnification; reducing the user's role in taking photos to providing an input of when the photos should be taken.
+
+## Method
+
+Tracking -> Angle and Distance for camera movement/focus/magnification
+
+Button -> Take a photo (assume camera settings are correct)
+
+Open at boot to remove need for graphical interface
+
+Expansion? -> Send photos to server to view remotely while using device
+
+## Hardware
+
+Tracking: UWB sensor network (DWM1001-Dev x 5, 1 Tag, 3 Anchors, 1 Passive Anchor Listener Node)
+
+Camera: ArduCam Hawk Eye 64MP
+
+Camera movement: Servo
+
+Camera button: AB Shutter 3
+
+Microcontroller: Raspberry Pi Model 3B
+
+# Configuring the Raspberry Pi
+
 ## Installing Dependencies
 
 Before running the program, the python modules `pigpio`, `evdev`, and proprietary flavors of `libcamera` and `picamera2` must be installed. 
