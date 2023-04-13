@@ -22,7 +22,8 @@ class Shutter:
 		self.connect()
 		while True:
 			for event in self.shutter.read_loop():
-				time.sleep(0.5)
+				# REMOVE?
+				#time.sleep(0.5)
 				if event.type == ecodes.EV_KEY and event.value == EV_VAL_PRESSED and event.code == BTN_SHUTTER:
 					print(f"Adding camera event to queue ({self.queue+1} total)")
 					self.queue += 1

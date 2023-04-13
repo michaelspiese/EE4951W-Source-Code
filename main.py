@@ -1,14 +1,28 @@
 import UWB, servo, cam, shutter, time, threading
 
 def servoThread():
+    temp = 0
+    #direc = 10
     while True:
         serv.move(uwb.theta)
         time.sleep(0.1)
+        #temp += direc
+        #if temp > 180 or temp < 0:
+        #    direc *= -1
+        #    temp = 2*direc+temp
         
 def cameraThread():
+    lp = 6.5
     while True:
-        time.sleep(1)
+        # REMOVE?
+        #time.sleep(1)
         if btn.queue > 0:
+            # Steps up the focus from 0 to 10 by 0.5
+            camera.set_focus(lp)
+            #print(lp)
+            #lp += 0.5
+            #if lp == 10.5:
+            #    lp = 0.0
             camera.takePhoto()
             print(f"Removing camera event from queue ({btn.queue-1} total)")
             btn.queue -= 1
@@ -37,6 +51,7 @@ if __name__ == "__main__":
         # Read position from sensors, write angle to servo, magnification and focus to camera?
         try:
             uwb.update_pos()
+            pass
         except Exception as ex:
             print(ex)
             break

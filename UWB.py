@@ -10,6 +10,7 @@ class UWB:
         self.bufIdx = 0
         self.x = 0.0
         self.y = 0.0
+        self.dist = 0.0
         self.theta = 0
 
         # Opening a serial connection with the gateway
@@ -32,13 +33,20 @@ class UWB:
         if(len(line) >= 20):
             # Parse data to store new values of x and y in buffer ONLY IF these values are valid
             parse = line.decode().split(',')
-            if parse[-5].strip() != "nan":
-                self.xbuf[self.bufIdx] = float(parse[-5].strip())
-                self.ybuf[self.bufIdx] = float(parse[-4].strip())
-                self.bufIdx = (self.bufIdx+1) % self.precision
+            try:
+                if parse[-5].strip() != "nan":
+                    self.xbuf[self.bufIdx] = float(parse[-5].strip())
+                    self.ybuf[self.bufIdx] = float(parse[-4].strip())
+                    self.bufIdx = (self.bufIdx+1) % self.precision
+            except:
+                print("Ignoring out of range error from parsing line")
+                return
 
                 # Update xy position of tag
                 self.x, self.y = (mean(self.xbuf),mean(self.ybuf))
+                
+                # Calculating the distance of the direct path to the tag from the camera
+                self.dist = math.sqrt(self.x**2 + self.y**2)
 
                 # Update angle from new values of x and y
                 try:	
@@ -46,7 +54,7 @@ class UWB:
                 except ZeroDivisionError:
                     pass # Ignore very specific case where y=0 exactly
                     
-                print(f"x={self.x:.3f} y={self.y:.3f} angle={self.theta}")
+                print(f"x={self.x:.3f} y={self.y:.3f} distance={self.dist} angle={self.theta}")
     
     def close(self):
         self.toggleDataFlow()
