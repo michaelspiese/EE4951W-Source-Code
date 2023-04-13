@@ -69,12 +69,13 @@ dtoverlay=vc4-kms-v3d,cma-256
 In order to make the device more user-friendly, a script to launch the program at boot should be created. In our case, the boot script `soccer-tracker.sh` looks like the following:
 
 ```shell
+#!/bin/bash
 sudo pigpiod &
 sleep 10
 lxterminal --title="Soccer Tracker" -e "python3 /home/pi/EE4951W-Source-Code/main.py; read -n 1 -s" 
 ```
 
-Add this script to the directory `/usr/local/bin`.
+Make sure to change the location to the main python file, and add this script to the directory `/usr/local/bin`.
 
 Next, use the following command to make this shell file an executable script:
 
@@ -84,7 +85,7 @@ Next, use the following command to make this shell file an executable script:
 
 ## Autostart
 
-Since this project runs at startup in a terminal window, we are using LXDE-pi autostart to run our boot script after the graphical environment has been started. Add the following line to the file `/etc/xdg/lxsession/LXDE-pi/autostart` for the same results.
+Since this project runs at startup in a terminal window, we are using LXDE-pi autostart to run our boot script after the graphical environment has been started. Add the following line to the end of the file `/etc/xdg/lxsession/LXDE-pi/autostart` for the same results.
 
 ```
 @bash /path-to-boot-script/soccer-tracker.sh
