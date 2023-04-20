@@ -15,7 +15,7 @@ def cameraThread():
     lp = 6.5
     while True:
         # REMOVE?
-        #time.sleep(1)
+        time.sleep(1)
         if btn.queue > 0:
             # Steps up the focus from 0 to 10 by 0.5
             camera.set_focus(lp)
@@ -29,10 +29,11 @@ def cameraThread():
 
 def setup():
     global serv, uwb, camera, btn
-    uwb = UWB.UWB("/dev/ttyACM0", 1)
+    uwb = UWB.UWB("/dev/ttyS0", 1)
     serv = servo.Servo(12)
     btn = shutter.Shutter()
-    camera = cam.ArducamHawkEye(res=(2312, 1736))
+    camera = cam.ArducamHawkEye(res=(1920, 1080))
+    #camera = cam.ArducamHawkEye(res=(2312, 1736))
     #camera = cam.ArducamHawkEye(res=(4624, 3472))
     
     servThread = threading.Thread(target=servoThread, daemon=True).start()
@@ -51,7 +52,6 @@ if __name__ == "__main__":
         # Read position from sensors, write angle to servo, magnification and focus to camera?
         try:
             uwb.update_pos()
-            pass
         except Exception as ex:
             print(ex)
             break
