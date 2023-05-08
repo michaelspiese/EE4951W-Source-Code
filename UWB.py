@@ -35,6 +35,9 @@ class UWB:
             parse = line.decode().split(',')
             if len(parse) > 4:
                 if parse[3].strip() != "nan":
+                    #if float(parse[4]).strip() < 1:
+                    #    return
+                    
                     self.xbuf[self.bufIdx] = float(parse[3].strip())
                     self.ybuf[self.bufIdx] = float(parse[4].strip())
                     self.bufIdx = (self.bufIdx+1) % self.precision
@@ -51,9 +54,9 @@ class UWB:
                     except ZeroDivisionError:
                         pass # Ignore very specific case where y=0 exactly
                     
-            else:
-                print(line.decode().strip(), end='')
-                print()
+            #else:
+                #print(line.decode().strip(), end='')
+                #print()
                 
             print(f"x={self.x:.3f} y={self.y:.3f} distance={self.dist:.3f} angle={self.theta:.3f}")
         
