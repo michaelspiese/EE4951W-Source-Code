@@ -1,60 +1,46 @@
 import UWB, servo, cam, shutter, time, threading
 
+# Thread to move servo to angle of tag
 def servoThread():
-    temp = 0
-    #direc = 10
     while True:
         serv.move(uwb.theta)
         time.sleep(0.1)
-        #temp += direc
-        #if temp > 180 or temp < 0:
-        #    direc *= -1
-        #    temp = 2*direc+temp
         
+# Thread to take a photo when the shutter button is pressed
 def cameraThread():
-    lp = 0.0
     while True:
-        # REMOVE?
         time.sleep(0.5)
         if btn.queue > 0:
-            if uwb.dist == 0 or 1/uwb.dist > 10.0:
-                lp = 10.0
-            else:
-                lp = 1/uwb.dist
-            # Steps up the focus from 0 to 10 by 0.5
-            #camera.set_focus(lp)
-            #time.sleep(0.1)
-            #print(lp)
-            #lp += 0.5
-            #if lp == 10.5:
-            #    lp = 0.0
             camera.takePhoto()
             print(f"Removing camera event from queue ({btn.queue-1} total)")
             btn.queue -= 1
 
+# Setup function to initialize all sensors, devices, and threads
 def setup():
     global serv, uwb, camera, btn
-    uwb = UWB.UWB("/dev/ttyACM0", 1)
-    serv = servo.Servo(12)
-    btn = shutter.Shutter()
-    #camera = cam.ArducamHawkEye(res=(1920, 1080))
-    camera = cam.ArducamHawkEye(res=(2312, 1736))
-    #camera = cam.ArducamHawkEye(res=(4624, 3472))
     
-    servThread = threading.Thread(target=servoThread, daemon=True).start()
-    shutterThread = threading.Thread(target=btn.btn_loop, daemon=True).start()
-    camThread = threading.Thread(target=cameraThread, daemon=True).start()
+    uwb = UWB.UWB("/dev/ttyACM0", 1)                # Open serial connection to gateway with USB port /dev/ttyACM0
+    serv = servo.Servo(12)                          # Initialize servo on GPIO pin 12
+    btn = shutter.Shutter()                         # Initialize shutter button
+    camera = cam.ArducamHawkEye(res=(2312, 1736))   # Initialize camera with resolution 2312x1736
+    
+    # Start threads for each asynchronous task
+    threading.Thread(target=servoThread, daemon=True).start()
+    threading.Thread(target=btn.btn_loop, daemon=True).start()
+    threading.Thread(target=cameraThread, daemon=True).start()
 
+# Cleanup function to safely exit program
 def cleanup():
     uwb.close()
     serv.stop_pwm()
 
+# Main function to run program. Setup -> Run -> Cleanup
 if __name__ == "__main__":
     setup()
 
     uwb.toggleDataFlow()
     while 1:
-        # Read position from sensors, write angle to servo, magnification and focus to camera?
+        # Update position of tag as fast as possible until keyboard interrupt is received.
         try:
             uwb.update_pos()
         except Exception as ex:
@@ -62,6 +48,6 @@ if __name__ == "__main__":
             break
         except KeyboardInterrupt:
             break
-
-    cleanup()
     
+    # Cleanup and exit
+    cleanup()

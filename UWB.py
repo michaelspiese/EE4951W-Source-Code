@@ -1,4 +1,4 @@
-import serial, time, math, random
+import serial, time, math
 from statistics import mean
 
 class UWB:
@@ -21,23 +21,24 @@ class UWB:
         self.DWM.write("\r\r".encode())
         time.sleep(1)
 
+    # Toggling the data flow from the gateway by sending the "lec" command to the DWM1001 in shell mode.
     def toggleDataFlow(self):
-        # Write the command to toggle reading positional data from the gateway
         self.DWM.write("lec\r".encode())
         time.sleep(1)
 
+    # Updating the position of the tag by reading a new line of positional data from the gateway.
     def update_pos(self):
-        # Read a new line of positional data
         line = self.DWM.readline()
+
         # Make sure the line is long enough to be cosidered
         if(len(line) >= 20):
+
             # Parse data to store new values of x and y in buffer ONLY IF these values are valid
             parse = line.decode().split(',')
             if len(parse) > 4:
                 if parse[3].strip() != "nan":
-                    #if float(parse[4]).strip() < 1:
-                    #    return
                     
+                    # Store new values of x and y in buffers
                     self.xbuf[self.bufIdx] = float(parse[3].strip())
                     self.ybuf[self.bufIdx] = float(parse[4].strip())
                     self.bufIdx = (self.bufIdx+1) % self.precision
@@ -53,24 +54,22 @@ class UWB:
                         self.theta = int(math.atan(self.x/self.y)*-180/math.pi) + 90
                     except ZeroDivisionError:
                         pass # Ignore very specific case where y=0 exactly
-                    
-            #else:
-                #print(line.decode().strip(), end='')
-                #print()
-                
+  
             print(f"x={self.x:.3f} y={self.y:.3f} distance={self.dist:.3f} angle={self.theta:.3f}")
-        
+    
+    # Turn off positional data flow and close serial connection to gateway
     def close(self):
         self.toggleDataFlow()
         self.DWM.close()
-        
+
+# For testing purposes. Setup sensor network and run this file to see if the UWB class works as intended. 
+# Displays tag position, distance, and angle until keyboard interrupt is received.
 if __name__ == "__main__":
     u = UWB("/dev/ttyACM0", 1)
     u.toggleDataFlow()
     while True:
         try:
             u.update_pos()
-            #print(f"x: {u.x}, y: {u.y}, angle: {u.theta}")
         except KeyboardInterrupt:
             break
     u.close()
