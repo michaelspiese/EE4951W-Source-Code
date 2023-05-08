@@ -12,13 +12,18 @@ def servoThread():
         #    temp = 2*direc+temp
         
 def cameraThread():
-    lp = 6.5
+    lp = 0.0
     while True:
         # REMOVE?
-        time.sleep(1)
+        time.sleep(0.5)
         if btn.queue > 0:
+            if uwb.dist == 0 or 1/uwb.dist > 10.0:
+                lp = 10.0
+            else:
+                lp = 1/uwb.dist
             # Steps up the focus from 0 to 10 by 0.5
-            camera.set_focus(lp)
+            #camera.set_focus(lp)
+            #time.sleep(0.1)
             #print(lp)
             #lp += 0.5
             #if lp == 10.5:
@@ -29,11 +34,11 @@ def cameraThread():
 
 def setup():
     global serv, uwb, camera, btn
-    uwb = UWB.UWB("/dev/ttyS0", 1)
+    uwb = UWB.UWB("/dev/ttyACM0", 1)
     serv = servo.Servo(12)
     btn = shutter.Shutter()
-    camera = cam.ArducamHawkEye(res=(1920, 1080))
-    #camera = cam.ArducamHawkEye(res=(2312, 1736))
+    #camera = cam.ArducamHawkEye(res=(1920, 1080))
+    camera = cam.ArducamHawkEye(res=(2312, 1736))
     #camera = cam.ArducamHawkEye(res=(4624, 3472))
     
     servThread = threading.Thread(target=servoThread, daemon=True).start()
